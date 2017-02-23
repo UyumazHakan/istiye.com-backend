@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>ISTIYE - {{ restaurant.name }}</title>
+</head>
+<body>
+    {% for menu in restaurant.menus.all %}
+    {{ menu.name }}
+    {% for category in menu.categories.all %}
+    {{ category.name }}
+    {% for food in category.foods.all %}
+    <a href="{% url 'add_cart' food.id %}">
+        {{ food.name }}
+    </a>
+    {% endfor %}
+    {% endfor %}
+    {% endfor %}
+</body>
+</html>

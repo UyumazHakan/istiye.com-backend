@@ -1,0 +1,134 @@
+{% load staticfiles %}
+
+{% if not request.user.is_authenticated %}
+
+
+        <!-- Modal -->
+        <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+          <div class="modal-dialog" role="document">
+            <div class="modal-content">
+              <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="myModalLabel">Kayıt formu</h4>
+              </div>
+              <div class="modal-body">
+                <div class="form-group">
+                <form action="{% url 'register' %}" method="post" id="register_form">
+                    <div class="row">
+                        {% csrf_token %}
+                        <div class="col-md-6" style="margin-bottom: 5px"><input type="text" class="form-control" placeholder="İsim" name="name"></div>
+                        <div class="col-md-6" style="margin-bottom: 5px"><input type="text" class="form-control" placeholder="Soyisim" name="surname"></div>
+                        <div class="col-md-12" style="margin-bottom: 5px"><input type="email" class="form-control" placeholder="Email" name="email"></div>
+                        <div class="col-md-12" style="margin-bottom: 5px"><input type="password" class="form-control" placeholder="Parola" name="password"></div>
+                        <div class="col-md-12" style="margin-bottom: 5px"><input type="password" class="form-control" placeholder="Parola Tekrar" name="password2"></div>
+                        <div class="col-md-12" style="margin-bottom: 5px"><input type="text" class="form-control" placeholder="Adres" name="address"></div>
+                        </form>
+                    </div>
+                </div>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Kapat</button>
+                <button type="submit" class="btn btn-danger" form="register_form">Kayıt Ol</button>
+              </div>
+            </div>
+          </div>
+        </div>
+    {% endif %}
+{% if request.user.is_authenticated %}
+
+
+        <!-- Modal -->
+        <div class="modal fade" id="editProfileModal" tabindex="-1" role="dialog" aria-labelledby="editProfileLabel">
+          <div class="modal-dialog" role="document">
+            <div class="modal-content">
+              <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="editProfileLabel">Kullanıcıyı düzenle</h4>
+              </div>
+              <div class="modal-body">
+                <div class="form-group">
+                <form action="{% url 'edit_profile' %}" method="post" id="edit_form">
+                    <div class="row">
+                        {% csrf_token %}
+                        <div class="col-md-6" style="margin-bottom: 5px"><input type="text" class="form-control" placeholder="İsim" name="name" value="{{ user.name }}"></div>
+                        <div class="col-md-6" style="margin-bottom: 5px"><input type="text" class="form-control" placeholder="Soyisim" name="surname" value="{{ user.surname }}"></div>
+                        <div class="col-md-12" style="margin-bottom: 5px"><input type="email" class="form-control" placeholder="Email" name="email" value="{{ user.email }}"></div>
+                        <div class="col-md-12" style="margin-bottom: 5px"><input type="password" class="form-control" placeholder="Parola" name="password"></div>
+                        <div class="col-md-12" style="margin-bottom: 5px"><input type="password" class="form-control" placeholder="Parola Tekrar" name="password2"></div>
+                        <div class="col-md-12" style="margin-bottom: 5px"><input type="text" class="form-control" placeholder="Adres" name="address" value="{{ user.address }}"></div>
+                        </form>
+                    </div>
+                </div>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Kapat</button>
+                <button type="submit" class="btn btn-danger" form="edit_form">Kaydet</button>
+              </div>
+            </div>
+          </div>
+        </div>
+    {% endif %}
+      <div class="row" style="height:190px; background-color: #C91F25; border-radius: 0 0 10px 10px;">
+        <div class="col-md-3">
+            <a href="{% url 'index' %}"><img src="{% static 'img/logo180.png' %}" style="height: 90%"></a>
+        </div>
+        <div class="col-md-6" style="margin-top: 50px">
+            <div class="row">
+              <div class="form-group">
+              <form action="/search/" method="post">
+                {% csrf_token %}
+                <div class="col-md-12"><input type="text" class="form-control" placeholder="Yemek Resorant Ara" name="key"></div>
+
+              </form>
+              </div>
+            </div>
+            <div class="row" style="margin-top: 50px; margin-left: 20px; ">
+                {% if request.user.is_authenticated %}<a href="{% url 'restaurants' %}" style="color: #ffffff;">Restaurantlar</a>{% endif %}
+                {% if not request.user.is_authenticated %}<a href="#" style="color: #ffffff;" data-toggle="modal" data-target="#myModal">
+          Kayıt Ol</a>{% endif %}
+                {% if request.user.is_authenticated and request.user.is_owner %}<a href="{% url 'orders' %}" style="color: #ffffff;">Siparişler</a>{% endif %}
+            </div>
+        </div>
+        <div class="col-md-2" style="margin-top: 20px;background-color: #FBC010; padding: 30px 30px 30px 30px; margin-left: 20px; height: 130px; border-radius: 20px">
+            {% if request.user.is_authenticated %}
+                <div class="row">
+                    <div class="col-md-12"><a href="#" data-toggle="modal" data-target="#editProfileModal">{{ request.user.name }} {{ request.user.surname }}</a></div>
+                </div>
+                <div class="row"></div>
+                <div class="row"></div>
+                <div class="row">
+                    <div class="col-md-12">
+                        <a href="{% url 'logout' %}">Logout</a>
+                    </div>
+                </div>
+            {% else %}
+          <div class="form-group">
+              <form action="/login/" method="post">
+                {% csrf_token %}
+                <div class="row"><input type="text" class="form-control" placeholder="E-mail" name="email"></div>
+                <div class="row"><input type="password" class="form-control" placeholder="Password" name="password"></div>
+                <input type="submit" style="position: absolute; left: -9999px"/>
+              </form>
+          </div>
+            {% endif %}
+        </div>
+      </div>
+        {% if message %}
+            {% if message.type == "1" %}
+        <div class="alert alert-success">
+          <strong>{{ message.head }}</strong> {{ message.body }}
+        </div>
+            {% elif message.type == "2" %}
+        <div class="alert alert-info">
+          <strong>{{ message.head }}</strong> {{ message.body }}
+        </div>
+            {% elif message.type == "3" %}
+        <div class="alert alert-warning">
+          <strong>{{ message.head }}</strong> {{ message.body }}
+        </div>
+            {% else %}
+        <div class="alert alert-danger">
+          <strong>{{ message.head }}</strong> {{ message.body }}
+        </div>
+            {% endif %}
+        {% endif %}

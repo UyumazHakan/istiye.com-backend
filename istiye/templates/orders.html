@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    {% load staticfiles %}
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+    <title>ISTIYE</title>
+
+    <!-- Bootstrap -->
+    <link href="{% static 'css/bootstrap.min.css' %}" rel="stylesheet">
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+  <body style="background-color: #EAEAEA">
+    <div class="container">
+
+     {% include 'header.html' %}
+            <!-- Modal -->
+        <div class="modal fade" id="orderModal" tabindex="-1" role="dialog">
+          <div class="modal-dialog" role="document">
+            <div class="modal-content">
+              <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+              </div>
+              <div class="modal-body" id="order_details">
+
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Kapat</button>
+                <button type="submit" class="btn btn-danger" id="order_button"></button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="row" style="background-color: #E0E0E0; padding: 50px 30px 50px 30px; border-radius: 0 0 10px 10px; margin:0; font-weight: bold">
+            <div class="row" style="background-color: #C91F25; padding: 10px; border-radius: 10px; text-align: center">
+
+                <div class="row" style="background-color: #E0E0E0;width: 90%;margin: 0 auto; border-radius: 10px">
+                    <div class="row" style="background-color: #C91F25;color: white">
+                        <div class="col-md-12">Siparişler</div>
+                    </div>
+                <div id="orders">
+                {% if not orders %}
+                    <div class="row" style="padding-bottom: 20px; border-bottom: 1px solid rgb(201, 31, 37);"><div class="col-md-12">Şu anda aktif siparişiniz bulunmuyor</div></div>
+                {% endif %}
+                {% for order in orders %}
+                    {% if order.type != "3" %}
+                    <a href="#" data-order="{{ order.id }}" class="order">
+                        <div class="row" style="padding-bottom: 20px; border-bottom: 1px solid #C91F25">
+                            <div class="col-md-12">{{ order }}</div>
+                        </div>
+                    </a>
+                    {% endif %}
+                {% endfor %}
+                </div>
+                </div>
+            </div>
+        </div>
+    {% include 'footer.html' %}
+    </div>
+
+    <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <!-- Include all compiled plugins (below), or include individual files as needed -->
+    <script src="{% static 'js/bootstrap.min.js' %}"></script>
+  <script type="text/javascript">
+        function getCookie(name) {
+             var cookieValue = null;
+             if (document.cookie && document.cookie != '') {
+                 var cookies = document.cookie.split(';');
+                 for (var i = 0; i < cookies.length; i++) {
+                     var cookie = jQuery.trim(cookies[i]);
+                     // Does this cookie string begin with the name we want?
+                     if (cookie.substring(0, name.length + 1) == (name + '=')) {
+                         cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                         break;
+                     }
+                 }
+             }
+             return cookieValue;
+         }
+        var refresh_orders = function (data) {
+
+                var order_list = document.getElementById("orders");
+                while (order_list.firstChild) {
+                    order_list.removeChild(order_list.firstChild);
+                }
+                if(data.orders.length == 0){
+                    var row = document.createElement("div");
+                    row.className ="row";
+                    row.style= "padding-bottom: 20px; border-bottom: 1px solid #C91F25";
+                    var name_column = document.createElement("div");
+                    name_column.className = "col-md-12";
+                    var name = document.createTextNode("Şu anda aktif siparişiniz bulunmuyor");
+                    name_column.appendChild(name);
+                    row.appendChild(name_column);
+                    order_list.appendChild(row);
+                }
+                for(var i = 0; i<data.orders.length; i++)
+                {
+                    var order = data.orders[i];
+                    if(order["type_id"] == "3") continue;
+                    console.log(order);
+                    var link = document.createElement("a");
+                    link.href = "#";
+                    link.className = "order";
+                    link.setAttribute("data-order", order["id"]);
+                    var row = document.createElement("div");
+                    row.className ="row";
+                    row.style= "padding-bottom: 20px; border-bottom: 1px solid #C91F25";
+                    var name_column = document.createElement("div");
+                    name_column.className = "col-md-12";
+                    var name = document.createTextNode(order["name"]);
+                    name_column.appendChild(name);
+                    row.appendChild(name_column);
+                    link.appendChild(row);
+                    order_list.appendChild(link);
+                }
+                setTimeout(get_orders, 10000);
+            }
+    var show_order = function(data){
+            var order_panel = document.getElementById("order_details");
+            while (order_panel.firstChild) {
+                    order_panel.removeChild(order_panel.firstChild);
+            }
+            var type_row = document.createElement("div");
+            type_row.className = "row";
+            var type_name_column = document.createElement("div");
+            type_name_column.className = "col-md-6";
+            var type_data_column = document.createElement("div");
+            type_data_column.className = "col-md-6";
+            var type_name_text =  document.createTextNode("Type");
+            type_name_column.appendChild(type_name_text);
+            var type_data_text = document.createTextNode(data.type);
+            type_data_column.appendChild(type_data_text);
+            type_row.appendChild(type_name_column);
+            type_row.appendChild(type_data_column);
+            order_panel.appendChild(type_row);
+
+            var order_owner_row = document.createElement("div");
+            order_owner_row.className = "row";
+            var order_owner_name_column = document.createElement("div");
+            order_owner_name_column.className = "col-md-6";
+            var order_owner_data_column = document.createElement("div");
+            order_owner_data_column.className = "col-md-6";
+            var order_owner_name_text =  document.createTextNode("order_owner");
+            order_owner_name_column.appendChild(order_owner_name_text);
+            var order_owner_data_text = document.createTextNode(data.order_owner);
+            order_owner_data_column.appendChild(order_owner_data_text);
+            order_owner_row.appendChild(order_owner_name_column);
+            order_owner_row.appendChild(order_owner_data_column);
+            order_panel.appendChild(order_owner_row);
+
+            var date_row = document.createElement("div");
+            date_row.className = "row";
+            var date_name_column = document.createElement("div");
+            date_name_column.className = "col-md-6";
+            var date_data_column = document.createElement("div");
+            date_data_column.className = "col-md-6";
+            var date_name_text =  document.createTextNode("date");
+            date_name_column.appendChild(date_name_text);
+            var date_data_text = document.createTextNode(data.date);
+            date_data_column.appendChild(date_data_text);
+            date_row.appendChild(date_name_column);
+            date_row.appendChild(date_data_column);
+            order_panel.appendChild(date_row);
+
+            var items_row = document.createElement("div");
+            items_row.className = "row";
+            items_row.style = "margin-top:40px; font-weight: bold;";
+            var items_name_column = document.createElement("div");
+            items_name_column.className = "col-md-6";
+            var items_data_column = document.createElement("div");
+            items_data_column.className = "col-md-6";
+            var items_name_text =  document.createTextNode("Ürün İsmi");
+            items_name_column.appendChild(items_name_text);
+            var items_data_text = document.createTextNode("Adet");
+            items_data_column.appendChild(items_data_text);
+            items_row.appendChild(items_name_column);
+            items_row.appendChild(items_data_column);
+            order_panel.appendChild(items_row);
+            order_panel.appendChild(document.createElement("hr"));
+
+            for(var i = 0; i<data.items.length; i++){
+                var _row = document.createElement("div");
+                _row.className = "row";
+                var _name_column = document.createElement("div");
+                _name_column.className = "col-md-6";
+                var _data_column = document.createElement("div");
+                _data_column.className = "col-md-6";
+                var _name_text =  document.createTextNode(data.items[i].name);
+                _name_column.appendChild(_name_text);
+                var _data_text = document.createTextNode(data.items[i].amount);
+                _data_column.appendChild(_data_text);
+                _row.appendChild(_name_column);
+                _row.appendChild(_data_column);
+                order_panel.appendChild(_row);
+            }
+            order_panel.appendChild(document.createElement("hr"));
+            var total_price_row = document.createElement("div");
+            total_price_row.className = "row";
+            total_price_row.style = "font-weight: bold;";
+            var total_price_name_column = document.createElement("div");
+            total_price_name_column.className = "col-md-6";
+            var total_price_data_column = document.createElement("div");
+            total_price_data_column.className = "col-md-6";
+            var total_price_name_text =  document.createTextNode("Toplam Fiyat");
+            total_price_name_column.appendChild(total_price_name_text);
+            var total_price_data_text = document.createTextNode(data.total_price);
+            total_price_data_column.appendChild(total_price_data_text);
+            total_price_row.appendChild(total_price_name_column);
+            total_price_row.appendChild(total_price_data_column);
+            order_panel.appendChild(total_price_row);
+
+            var order_button = document.getElementById("order_button");
+            if(order_button.firstChild)
+                order_button.removeChild(order_button.firstChild);
+            var button_text = document.createTextNode("");
+            order_button.setAttribute("data-order", data.id);
+            order_button.style.display = "inline-block";
+            if(data.type_id == "0") {
+                button_text = document.createTextNode("Kabul Et");
+            }else if(data.type_id == "1") {
+                    button_text = document.createTextNode("Yola Çıktı");
+            }else if(data.type_id == "2") {
+                button_text = document.createTextNode("Ulaştı");
+            }else if(data.type_id == "3") {
+                order_button.style.display = "none";
+            }
+            order_button.appendChild(button_text);
+
+
+
+    }
+
+    var get_orders = function () {
+        $.ajax({
+            url: "{% url 'activeOrdersJSON' %}",
+            type: "POST",
+            data: '',
+            dataType: "JSON",
+            headers: {"X-CSRFToken": getCookie('csrftoken')},
+            success: refresh_orders ,
+            error: function (data) {
+                console.log(data);
+            }
+        });
+    };
+    var process_order = function () {
+        var order_id = $(this).attr('data-order');
+        $.ajax({
+            url: "{% url 'process_order' %}",
+            type: "POST",
+            data: 'order=' + order_id,
+            dataType: "JSON",
+            headers: {"X-CSRFToken": getCookie('csrftoken')},
+            success: show_order ,
+            error: function (data) {
+                console.log(data);
+            }
+        });
+        get_orders();
+    };
+
+    var get_order = function () {
+        console.log("asadas")
+        var order_id = $(this).attr('data-order');
+        $.ajax({
+            url: "{% url 'orderJSON' %}",
+            type: "POST",
+            data: 'order=' + order_id,
+            dataType: "JSON",
+            headers: {"X-CSRFToken": getCookie('csrftoken')},
+            success: show_order ,
+            error: function (data) {
+                console.log(data);
+            }
+        });
+        $("#orderModal").modal("show");
+    };
+        $("body").on('click', '#order_button', process_order);
+        $("body").on('click', '.order', get_order);
+        setTimeout(get_orders, 10000);
+    </script>
+  </body>
+</html>
